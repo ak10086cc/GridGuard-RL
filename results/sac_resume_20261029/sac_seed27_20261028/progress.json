@@ -1,0 +1,11 @@
+{
+  "status": "training_complete",
+  "seed": 27,
+  "timesteps": 50000,
+  "target_timesteps": 50000,
+  "gradient_updates": 49000,
+  "active_elapsed_s": 2599.7697019999996,
+  "best_validation_step": 50000,
+  "best_mean_validation_return": -7.666461112589882,
+  "validation_rounds": 10
+}

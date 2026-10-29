@@ -1,0 +1,21 @@
+[observation]
+# Analytic fixed scaling only; no statistics fitted from development or future data.
+voltage_scale_pu = 0.05
+
+[episode]
+# Full 96-step finite-horizon task terminates naturally. A smaller limit truncates.
+max_steps = 96
+
+[reward]
+# Initial engineering weights, NOT tuned or validated as optimal for SAC.
+voltage_weight = 1.0
+loss_weight = 1.0
+violation_weight = 10.0
+movement_weight = 0.1
+failure_penalty = 100.0
+# At zero available Q, keep all physical metrics but mask all four normal costs.
+uncontrollable_mode = "mask_normal_costs"
+
+[verification]
+scenario_seed = 42
+action_seed = 2026

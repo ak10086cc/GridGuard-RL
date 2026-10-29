@@ -1,0 +1,40 @@
+[run]
+seed = 7
+device = "cpu"
+torch_threads = 1
+# Eight 96-step episodes; 672 updates after the 96-step warmup.
+total_timesteps = 768
+validation_interval = 384
+
+[sac]
+learning_rate = 0.0003
+buffer_size = 4096
+learning_starts = 96
+batch_size = 64
+tau = 0.005
+gamma = 0.99
+train_freq = 1
+gradient_steps = 1
+ent_coef = "auto"
+net_arch = [64, 64]
+log_every_updates = 32
+
+[scenarios]
+# Complete synthetic days, not randomly split overlapping time windows.
+train_seeds = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008,
+               1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016,
+               1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024,
+               1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032]
+validation_seeds = [2001, 2002]
+test_seeds = [3001, 3002, 3003, 3004]
+reserved_development_seeds = [42, 43]
+pv_cloud_min = 0.35
+pv_cloud_max = 1.0
+
+[budget_proposal]
+# Proposal only; sac-smoke never launches this schedule.
+seeds = [7, 17, 27]
+timesteps_per_seed = 50000
+validation_interval = 5000
+learning_starts = 1000
+buffer_size = 100000

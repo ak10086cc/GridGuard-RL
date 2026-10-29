@@ -1,0 +1,257 @@
+{
+  "run_digest": "82c2b51b5b638dea2d13f0f0f28f16ce10998822846c5cf4e96cb3f555c1c192",
+  "grid": {
+    "network": {
+      "sn_mva": 10.0,
+      "voltage_min_pu": 0.95,
+      "voltage_max_pu": 1.05,
+      "reference_pu": 1.0,
+      "algorithm": "nr",
+      "max_iteration": 30,
+      "tolerance_mva": 1e-08
+    },
+    "pv": {
+      "buses": [
+        6,
+        14,
+        18,
+        22,
+        25,
+        30,
+        33
+      ],
+      "installed_to_base_load_ratio": 2.0,
+      "inverter_s_to_p_ratio": 1.2,
+      "night_var_enabled": false
+    },
+    "scenario": {
+      "source": "synthetic_development_only",
+      "seed": 42,
+      "steps": 96,
+      "step_minutes": 15,
+      "sunrise_hour": 6.0,
+      "sunset_hour": 18.0,
+      "load_min": 0.55,
+      "load_max": 1.0,
+      "load_noise_std": 0.015,
+      "pv_cloud_min": 0.35,
+      "pv_cloud_max": 1.0
+    },
+    "verification": {
+      "probe_bus": 18,
+      "probe_fraction_of_capability": 0.1,
+      "candidate_buses": [
+        18,
+        14
+      ],
+      "candidate_fractions": [
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "stress_load_scale": 1.5
+    }
+  },
+  "environment": {
+    "observation": {
+      "voltage_scale_pu": 0.05
+    },
+    "episode": {
+      "max_steps": 96
+    },
+    "reward": {
+      "voltage_weight": 1.0,
+      "loss_weight": 1.0,
+      "violation_weight": 10.0,
+      "movement_weight": 0.1,
+      "failure_penalty": 100.0,
+      "uncontrollable_mode": "mask_normal_costs"
+    },
+    "verification": {
+      "scenario_seed": 42,
+      "action_seed": 2026
+    }
+  },
+  "baselines": {
+    "source": {
+      "paper_title": "Dual Sensitivity Guided Reactive Power Control for Enhanced Photovoltaic Hosting Capacity in Distribution Networks",
+      "paper_sha256": "11093fe1bcf1af21447bcee561c5774e08f22548b958d0697bed087e8ea907a2",
+      "implementation_scope": "paper_based_with_documented_project_conventions_not_exact_original_code_reproduction"
+    },
+    "volt_var": {
+      "voltage_points_pu": [
+        0.95,
+        0.98,
+        1.02,
+        1.05
+      ],
+      "qmax_to_s_ratio": 0.44,
+      "relaxation": 0.5,
+      "voltage_tolerance_pu": 1e-06,
+      "q_tolerance_mvar": 1e-06,
+      "fixed_point_tolerance_mvar": 1e-06,
+      "max_iterations": 150
+    },
+    "dsg": {
+      "perturbation_fraction": 0.01,
+      "voltage_tolerance_pu": 1e-07,
+      "q_tolerance_mvar": 1e-06,
+      "max_bisection_iterations": 24,
+      "max_backtracks": 8,
+      "max_powerflow_calls": 240,
+      "mixed_violation_rule": "largest_limit_exceedance_overvoltage_on_tie"
+    },
+    "evaluation": {
+      "repeat_atol": 1e-10,
+      "action_change_threshold_mvar": 0.0001,
+      "scenarios": [
+        {
+          "name": "synthetic_day_seed42",
+          "seed": 42,
+          "pv_cloud_min": 0.9,
+          "pv_cloud_max": 1.0
+        },
+        {
+          "name": "synthetic_cloud_seed43",
+          "seed": 43,
+          "pv_cloud_min": 0.35,
+          "pv_cloud_max": 1.0
+        }
+      ]
+    }
+  },
+  "sac": {
+    "run": {
+      "seed": 27,
+      "device": "cpu",
+      "torch_threads": 1,
+      "episode_print_interval": 5000,
+      "total_timesteps": 50000,
+      "validation_interval": 5000
+    },
+    "sac": {
+      "learning_rate": 0.0003,
+      "buffer_size": 100000,
+      "learning_starts": 1000,
+      "batch_size": 64,
+      "tau": 0.005,
+      "gamma": 0.99,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "ent_coef": "auto",
+      "net_arch": [
+        64,
+        64
+      ],
+      "log_every_updates": 1000
+    },
+    "scenarios": {
+      "train_seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029,
+        1030,
+        1031,
+        1032
+      ],
+      "validation_seeds": [
+        2001,
+        2002
+      ],
+      "test_seeds": [
+        3001,
+        3002,
+        3003,
+        3004
+      ],
+      "reserved_development_seeds": [
+        42,
+        43
+      ],
+      "pv_cloud_min": 0.35,
+      "pv_cloud_max": 1.0
+    },
+    "budget_proposal": {
+      "seeds": [
+        7,
+        17,
+        27
+      ],
+      "timesteps_per_seed": 50000,
+      "validation_interval": 5000,
+      "learning_starts": 1000,
+      "buffer_size": 100000
+    },
+    "formal": {
+      "seeds": [
+        7,
+        17,
+        27
+      ],
+      "workers": 2,
+      "checkpoint_interval": 5000,
+      "progress_interval": 500
+    }
+  },
+  "source_sha256": {
+    "gridguard\\__init__.py": "1f25dbe355fc08465fc29d3a8ea2cb164268e3edcf6e0017bf0cb27f851e50fa",
+    "gridguard\\__main__.py": "c4f95407dfe318af19d386076b49c040af06f97d6dcc19ed11be2e25ec921a5b",
+    "gridguard\\controllers.py": "7754606aae7b9a0c74c3298d45c2505a59883a6ef1c6495a1c54439165a8f10a",
+    "gridguard\\environment.py": "8dcab46b2e31cfe605569608ec95c7a83ca5ecc58170c816959e9fc1d116dc4a",
+    "gridguard\\environment_check.py": "7db2a69ff4e010a68876ccf9c160488f3e8ccd279cd38e875542099f4dc24b6c",
+    "gridguard\\evaluation.py": "f026ebebab1f6c9ba6eaa8c0a4dbf37cde659b2d50f9f0dfb9c2bf5891fdd02d",
+    "gridguard\\formal_experiment.py": "09fde2dc44709347b7bda49686356348d12869581b35655a84380986b6c2793d",
+    "gridguard\\learning.py": "f559924d0a2393b782674c95f598c4ec4f3f5058bd0b5017a411d13e28fbc4d2",
+    "gridguard\\network.py": "97aeea8efd17578d5f776094de20d96c2e3e27f140fa81981595889cc225f5f2",
+    "gridguard\\policy_evaluation.py": "b29773780b15d46d68f3b4aa4317de5e880714db65fbe7b7df53a89e91840d08",
+    "gridguard\\scenario.py": "e12b63ac485c28b85511efdc40afb414e58b49a56d7a7bbaa731b4469ed3d918",
+    "gridguard\\verification.py": "e56a9c2f2e3b311637a73c393e04a42a1ddfa53e86d62edf48b71aa91c329a2e",
+    "tests\\test_baselines.py": "8c29028361bf116dbf5cbca57e99ea692d47f688ce9b96364b39a45bcf7eea8f",
+    "tests\\test_environment.py": "1bca1e9f5a3348cdb08023bbf51022300f6e8faab93c95f3920be37b022314eb",
+    "tests\\test_formal_experiment.py": "6a731b71201704e92755a3487b4b8e8dfc5c508c1a26f4c4b978f8cfecf494f8",
+    "tests\\test_learning.py": "8997997f2263e4b37038ccc8e25bb192f2290ba83ebd9cc1afed0b4a0b18c48a",
+    "tests\\test_physics.py": "3c867fe20059e05c568423285204be7f0bda7a876db7e5ea3eaac15b842be032",
+    "pyproject.toml": "cb83e3649f1959b52a405d23bc002c26fd096341023a50bb92a7a647b6f519cf",
+    "run.ps1": "4ec78818f4e90615dca1b2dca14be32e2da0890303a1853fd9d7f6ed3cdd215e",
+    "setup.cfg": "36e7c28024c99fd9c87ab6a580a73d1a761ec8bd7cd6c0f8f2cdb3de2e31b400",
+    "requirements-lock.txt": "d7736cc8f48dfef48e42c40a4c7ed376262671944e879b08008bc97d21075979"
+  },
+  "dependencies": {
+    "pandapower": "3.5.6",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "scipy": "1.18.1",
+    "matplotlib": "3.10.8",
+    "pytest": "9.1.1",
+    "gymnasium": "1.4.0",
+    "torch": "2.8.0+cpu",
+    "stable-baselines3": "2.9.2"
+  }
+}

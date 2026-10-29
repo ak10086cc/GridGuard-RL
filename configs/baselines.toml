@@ -1,0 +1,43 @@
+# Paper II-C..F, III-A / Table I. Units are Mvar (1e-3 kvar = 1e-6 Mvar).
+[source]
+paper_title = "Dual Sensitivity Guided Reactive Power Control for Enhanced Photovoltaic Hosting Capacity in Distribution Networks"
+paper_sha256 = "11093fe1bcf1af21447bcee561c5774e08f22548b958d0697bed087e8ea907a2"
+implementation_scope = "paper_based_with_documented_project_conventions_not_exact_original_code_reproduction"
+
+[volt_var]
+voltage_points_pu = [0.95, 0.98, 1.02, 1.05]
+# Interpretation of paper's unspecified qmax-ratio denominator: 0.44 * fixed S_rated,
+# then limited by the same instantaneous circular capability used by every method.
+qmax_to_s_ratio = 0.44
+relaxation = 0.5
+voltage_tolerance_pu = 1e-6
+q_tolerance_mvar = 1e-6
+fixed_point_tolerance_mvar = 1e-6
+max_iterations = 150
+
+[dsg]
+perturbation_fraction = 0.01
+voltage_tolerance_pu = 1e-7
+q_tolerance_mvar = 1e-6
+max_bisection_iterations = 24
+max_backtracks = 8
+max_powerflow_calls = 240
+# Project convention: larger absolute limit exceedance first, overvoltage on ties.
+mixed_violation_rule = "largest_limit_exceedance_overvoltage_on_tie"
+# Ranking stays fixed; stable ties follow configured PV bus order.
+
+[evaluation]
+repeat_atol = 1e-10
+action_change_threshold_mvar = 1e-4
+
+[[evaluation.scenarios]]
+name = "synthetic_day_seed42"
+seed = 42
+pv_cloud_min = 0.90
+pv_cloud_max = 1.0
+
+[[evaluation.scenarios]]
+name = "synthetic_cloud_seed43"
+seed = 43
+pv_cloud_min = 0.35
+pv_cloud_max = 1.0

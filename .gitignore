@@ -30,3 +30,10 @@ Thumbs.db
 
 # 仅供本地查阅的参考论文
 /Dual Sensitivity Guided Reactive Power Control for Enhanced Photovoltaic Hosting Capacity in Distribution Networks.pdf
+
+# 只分发最终首版结果；保留本机其他实验但不纳入提交。
+/results/*
+!/results/sac_resume_20261029/
+/results/sac_resume_20261029/**/last_checkpoint.zip
+# 仅用于本机旧实验的恢复脚本；首版展示不依赖它。
+/resume_training.ps1

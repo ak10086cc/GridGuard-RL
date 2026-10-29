@@ -1,0 +1,42 @@
+# Network: pandapower case33bw (Baran & Wu / MATPOWER).
+# Paper section III-A and Table I: bus locations, load, limits, equal PV share.
+# Ratings and time series below are NEW development assumptions, not paper reproduction.
+[network]
+sn_mva = 10.0
+voltage_min_pu = 0.95
+voltage_max_pu = 1.05
+reference_pu = 1.0
+algorithm = "nr"
+max_iteration = 30
+tolerance_mva = 1e-8
+
+[pv]
+# Physical bus numbers (1-based); pandapower index is bus number minus one.
+buses = [6, 14, 18, 22, 25, 30, 33]
+# Nameplate active PV / original feeder active load (3.715 MW); NOT instantaneous penetration.
+installed_to_base_load_ratio = 2.0
+# Fixed inverter S = 1.2 * active nameplate for this development case.
+inverter_s_to_p_ratio = 1.2
+# Conservative development assumption: no night-time reactive service.
+night_var_enabled = false
+
+[scenario]
+source = "synthetic_development_only"
+seed = 42
+steps = 96
+step_minutes = 15
+sunrise_hour = 6.0
+sunset_hour = 18.0
+load_min = 0.55
+load_max = 1.0
+load_noise_std = 0.015
+pv_cloud_min = 0.90
+pv_cloud_max = 1.0
+
+[verification]
+probe_bus = 18
+probe_fraction_of_capability = 0.1
+# Explicit finite candidates, no DSG or optimization implementation.
+candidate_buses = [18, 14]
+candidate_fractions = [0.25, 0.5, 0.75, 1.0]
+stress_load_scale = 1.5

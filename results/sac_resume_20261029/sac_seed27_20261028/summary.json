@@ -1,0 +1,18 @@
+{
+  "status": "training_complete",
+  "seed": 27,
+  "timesteps": 50000,
+  "gradient_updates": 49000,
+  "replay_size": 50000,
+  "actor_changed_in_this_process": true,
+  "best_validation_step": 50000,
+  "best_validation_return": -7.666461112589882,
+  "best_model_sha256": "9a945b4d3ed8477bc0b5b527c3ea2d7054dd518d033ab148e48221addab702d0",
+  "best_reload_trajectory_exact": true,
+  "active_elapsed_s": 2599.7673566000003,
+  "complete_training_episodes": 520,
+  "failed_training_episodes": 0,
+  "last_training_episode_steps": 80,
+  "test_performance_evaluated_during_training": false,
+  "run_digest": "82c2b51b5b638dea2d13f0f0f28f16ce10998822846c5cf4e96cb3f555c1c192"
+}
