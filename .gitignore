@@ -37,3 +37,9 @@ Thumbs.db
 /results/sac_resume_20261029/**/last_checkpoint.zip
 # 仅用于本机旧实验的恢复脚本；首版展示不依赖它。
 /resume_training.ps1
+
+# 本机开发计划与 AI 协作指引，不属于项目展示与复现材料。
+/AGENTS.md
+/项目2_GridGuard-RL_项目方案.md
+/项目2_GridGuard-RL_执行方案.md
+/项目2_GridGuard-RL_阶段指令.md

@@ -2,7 +2,7 @@
 
 高比例光伏接入可能带来配电网电压越限，也会改变线路损耗。本项目在 IEEE 33 节点配电网中建立光伏无功控制仿真，比较传统控制方法与 Soft Actor-Critic（SAC），并保留可追溯的训练和评测记录。
 
-**当前进度：**首版已完成交流潮流与合成日场景、设备无功能力约束、三种传统基线、Gymnasium 环境、SAC 三种子训练和独立测试。DSG 完整复现依据仍有缺项，首版不标为全部验收通过；残差策略与潮流筛选仅完成小规模验证。本项目目前是本地仿真，不代表真实电网部署或严格安全保证。
+**当前进度：**首版已完成交流潮流与合成日场景、设备无功能力约束、三种传统基线、Gymnasium 环境、SAC 三种子训练和独立测试。DSG 是带有明确项目约定的工程实现，尚未完成论文数值的完整复现；残差策略与潮流筛选仅完成小规模验证。本项目目前是本地仿真，不代表真实电网部署或严格安全保证。
 
 我在项目中完成了电网与光伏建模、传统控制和强化学习环境实现、SAC 训练与断点保存、统一评测及结果整理。项目使用 Python、pandapower、Gymnasium、PyTorch 和 Stable-Baselines3。
 
@@ -63,19 +63,19 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 
 ## 训练、模型与复现
 
-正式训练配置位于 [configs/sac_formal.toml](./configs/sac_formal.toml)：CPU 最多两个并行进程、每进程单线程，3 个训练种子、每种子 50,000 步，每 5,000 步使用验证集选择模型并保存末尾恢复包。以下命令会启动新的长实验，需预留数小时；不要指向现有实验目录。本轮交付检查未重新运行长训练。
+正式训练配置位于 [configs/sac_formal.toml](./configs/sac_formal.toml)：CPU 最多两个并行进程、每进程单线程，3 个训练种子、每种子 50,000 步，每 5,000 步使用验证集选择模型并保存末尾恢复包。以下命令会启动新的长实验，需预留数小时；不要指向现有实验目录。
 
 ```powershell
 .\run.ps1 -Task sac-formal -Output results/sac_formal_new
 ```
 
-如需单独重新评测已分发的种子7模型和三个基线，可运行下列命令；它会计算全部四个测试日，耗时明显长于快速演示，本轮交付检查未重新运行该完整评测。其他种子替换模型路径和输出目录即可。三种子聚合的原始结果见前述指标文件。
+如需单独重新评测已分发的种子7模型和三个基线，可运行下列命令；它会计算全部四个测试日，耗时明显长于快速演示。其他种子替换模型路径和输出目录即可。三种子聚合的原始结果见前述指标文件。
 
 ```powershell
 .\run.ps1 -Task sac-evaluate -SACConfig configs/sac_formal.toml -Model results/sac_resume_20261029/sac_seed7_20261028/best_model.zip -Split test -Output tmp/sac_seed7_test_recheck
 ```
 
-结果目录保存了[实验配置与源码快照](./results/sac_resume_20261029/sac_formal_20261028/frozen_plan.json)、各种子的训练/验证曲线数据、三份验证最优 `best_model.zip`、测试原始指标和图表。原实验训练时的源码保存在同目录的 `source_snapshot.zip`；后续增强和演示开发使当前源码版本与训练时快照不同。末尾恢复包和较早的中间实验保留在本机，不属于拟提交文件。新的实验结果默认被 `.gitignore` 忽略，需要发布时再审查并明确纳入。
+结果目录保存了[实验配置与源码快照](./results/sac_resume_20261029/sac_formal_20261028/frozen_plan.json)、各种子的训练/验证曲线数据、三份验证最优 `best_model.zip`、测试原始指标和图表。原实验训练时的源码保存在同目录的 `source_snapshot.zip`；后续增强和演示开发使当前源码版本与训练时快照不同。末尾恢复包和较早的中间实验不随仓库分发。新的实验结果默认被 `.gitignore` 忽略，需要发布时再审查并明确纳入。
 
 模型文件包含 Stable-Baselines3 序列化内容，加载时只使用可信来源。分发的模型由本项目使用合成场景训练，没有加载外部预训练权重。原研究论文 PDF 仅本地查阅，不随仓库分发。
 
@@ -85,7 +85,6 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 - 夜间关闭无功服务时存在无法由这些设备修正的欠压。潮流收敛、完成回合与电压全部合格是不同指标。
 - DSG 的部分参数和实现细节采用明确的项目约定；论文原有结果没有计入本项目结果。
 - [残差与有限次数潮流校验](./gridguard/enhanced.py)已通过小规模功能测试，但尚未进行正式训练或独立消融。对预先越限的工况，筛选可能接受不加重越限的动作，不能将其称为严格安全。
-- 首版按私有仓库备份整理；是否公开及未登录访问、首页图片链接是否可用，均以实际公开后的检查为准。
 
 ## 项目结构
 
@@ -93,17 +92,11 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 configs/       网络、基线、环境及训练配置
 gridguard/     潮流、控制器、环境、训练、评测与演示入口
 tests/         物理约束、环境、基线、训练及恢复检查
-results/       正式结果；拟分发首版的模型、图表、配置和原始指标
+results/       首版正式结果、模型、图表、配置和原始指标
 run.ps1        Windows 安装、演示、训练与测试入口
 run_enhanced.ps1  可选增强模块入口；未开展正式增强实验
 tmp/           可删除的缓存、临时检查与试跑输出，不提交
 ```
-
-## 简历描述参考
-
-**GridGuard-RL｜高比例光伏配电网无功控制仿真**：基于 Python、pandapower 和 Gymnasium 构建 IEEE 33 节点时序仿真与设备无功约束，统一实现 Unity PF、Volt-VAR、DSG 和 SAC 对照；完成 SAC 三随机种子训练及四个合成测试日评测，记录电压越限、网损、动作和潮流失败指标。当前结果中 SAC 的测试越限率为 23.524%，平均线路网损为 176.81 ± 4.06 kW；结果基于仿真，未宣称优于 DSG。
-
-仓库地址：`https://github.com/ak10086cc/GridGuard-RL`。仓库当前为私有，公开并核验后才能作为无需登录即可访问的简历链接。
 
 ## 许可与来源
 
@@ -114,4 +107,3 @@ tmp/           可删除的缓存、临时检查与试跑输出，不提交
 - Dong Yang, *Dual Sensitivity Guided Reactive Power Control for Enhanced Photovoltaic Hosting Capacity in Distribution Networks*，方法背景与 DSG 公式参考。
 - [pandapower 测试电网说明](https://pandapower.readthedocs.io/en/stable/networks/power_system_test_cases.html)、[MATPOWER case33bw 参数](https://matpower.org/docs/ref/matpower6.0/case33bw.html)、[pandapower 静态发电机符号](https://pandapower.readthedocs.io/en/stable/elements/sgen.html)。
 - [Gymnasium API](https://gymnasium.farama.org/api/env/)、[Stable-Baselines3 SAC](https://stable-baselines3.readthedocs.io/en/master/modules/sac.html)。
-- [项目方案](./项目2_GridGuard-RL_项目方案.md)、[执行方案](./项目2_GridGuard-RL_执行方案.md)、[协作指引](./AGENTS.md)。
