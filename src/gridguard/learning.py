@@ -180,7 +180,7 @@ def estimate_budget(config, timings):
             "estimated_training_total_s": total, "planning_range_s": [total * .7, total * 1.5],
             "final_shared_test_evaluation_additional_s_estimate": timings["validation_comparison_s"] * len(config["scenarios"]["test_seeds"]) / len(config["scenarios"]["validation_seeds"]) * len(p["seeds"]),
             "limits": "CPU smoke extrapolation; includes periodic validation, excludes install and large-buffer serialization; test baseline work may be shared across seeds",
-            "saving": "one exclusive results directory per seed; best validation model, last model plus matching last replay buffer; no per-step checkpoints"}
+            "saving": "one exclusive outputs/runs directory per seed; best validation model, last model plus matching last replay buffer; no per-step checkpoints"}
 
 
 def run_sac_smoke(grid_config, environment_config, baseline_config, config, output):

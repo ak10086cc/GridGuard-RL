@@ -11,7 +11,7 @@ import sys
 
 # Set before importing numerical/plotting dependencies, even without run.ps1.
 import os
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 TMP = ROOT / "tmp"
 TMP.mkdir(exist_ok=True)
 sys.dont_write_bytecode = True
@@ -31,8 +31,9 @@ def provenance():
     def git(*args):
         result = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         return result.stdout.strip() if result.returncode == 0 else "unavailable"
-    files = [*sorted((ROOT / "gridguard").glob("*.py")), *sorted((ROOT / "tests").glob("*.py")),
-             ROOT / "pyproject.toml", ROOT / "run.ps1", ROOT / "setup.cfg", ROOT / "requirements-lock.txt"]
+    files = [*sorted((ROOT / "src/gridguard").glob("*.py")), *sorted((ROOT / "tests").glob("*.py")),
+             ROOT / "pyproject.toml", ROOT / "scripts/run.ps1", ROOT / "scripts/run_enhanced.ps1",
+             ROOT / "setup.cfg", ROOT / "requirements-lock.txt"]
     return {"utc": datetime.now(timezone.utc).isoformat(), "python": platform.python_version(),
             "platform": platform.platform(),
             "dependencies": {name: installed(name) for name in ("pandapower", "numpy", "pandas", "scipy", "matplotlib", "pytest", "gymnasium", "torch", "stable-baselines3")},
@@ -72,15 +73,15 @@ def main():
         if args.task == "sac-evaluate" and (not args.model or not Path(args.model).is_file()):
             parser.error("sac-evaluate requires an existing --model checkpoint")
     suffix = datetime.now().strftime("%Y%m%d_%H%M%S")
-    default = ROOT / ("results" if args.task == "check" else "tmp") / f"stage01_{args.task}_seed{config['scenario']['seed']}_{suffix}"
+    default = ROOT / ("outputs/runs" if args.task == "check" else "tmp") / f"stage01_{args.task}_seed{config['scenario']['seed']}_{suffix}"
     if args.task == "baselines":
-        default = ROOT / "results" / f"stage02_baselines_{suffix}"
+        default = ROOT / "outputs/runs" / f"stage02_baselines_{suffix}"
     if args.task == "env-check":
-        default = ROOT / "results" / f"stage03_environment_{suffix}"
+        default = ROOT / "outputs/runs" / f"stage03_environment_{suffix}"
     if args.task in ("sac-smoke", "sac-evaluate"):
         default = TMP / f"stage04_{args.task}_seed{sac_config['run']['seed']}_{suffix}"
     if args.task == "sac-formal":
-        default = ROOT / "results" / f"sac_formal_{suffix}"
+        default = ROOT / "outputs/runs" / f"sac_formal_{suffix}"
     if args.task == "demo":
         default = TMP / f"demo_seed42_{suffix}"
     output = Path(args.output).resolve() if args.output else default
@@ -92,7 +93,7 @@ def main():
     output.mkdir(parents=True, exist_ok=args.resume and args.task == "sac-formal")
     if args.task == "demo":
         from .demo import run_demo
-        model_path = Path(args.model) if args.model else ROOT / "results/sac_resume_20261029/sac_seed7_20261028/best_model.zip"
+        model_path = Path(args.model) if args.model else ROOT / "outputs/runs/sac_resume_20261029/sac_seed7_20261028/best_model.zip"
         result = run_demo(config, environment_config, baseline_config, sac_config, model_path, output)
         print(json.dumps({"output": str(output), **result}, ensure_ascii=False, indent=2))
         return

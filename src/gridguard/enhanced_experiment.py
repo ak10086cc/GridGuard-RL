@@ -23,7 +23,7 @@ from .learning import MeasuredSAC, actor_digest, load_sac_config, scenario_manif
 from .policy_evaluation import evaluate_policies
 from .scenario import load_config
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def evaluate_enhanced(grid, settings, baselines, enhanced, seeds, policy, *, mode, shield):
@@ -141,7 +141,7 @@ def train(grid, settings, baselines, enhanced, config, output, *, shield, resume
     output = Path(output)
     torch.set_num_threads(1); torch.use_deterministic_algorithms(True)
     source = provenance()
-    source['source_sha256']['run_enhanced.ps1'] = digest_file(ROOT / 'run_enhanced.ps1')
+    source['source_sha256']['scripts/run_enhanced.ps1'] = digest_file(ROOT / 'scripts/run_enhanced.ps1')
     run_data = {'grid': grid, 'environment': settings, 'baselines': baselines, 'enhanced': enhanced,
                 'sac': config, 'shield': shield, 'source_sha256': source['source_sha256'], 'dependencies': source['dependencies']}
     digest = hashlib.sha256(json.dumps(run_data, sort_keys=True).encode()).hexdigest()
@@ -337,8 +337,8 @@ def main():
     output = Path(args.output).resolve()
     if args.smoke and not output.is_relative_to(ROOT / 'tmp'):
         parser.error('Smoke artifacts must be under tmp/')
-    if not args.smoke and not output.is_relative_to(ROOT / 'results'):
-        parser.error('Formal artifacts must be under results/')
+    if not args.smoke and not output.is_relative_to(ROOT / 'outputs/runs'):
+        parser.error('Formal artifacts must be under outputs/runs/')
     grid_config = load_config(ROOT / 'configs/ieee33.toml')
     settings = load_environment_config(ROOT / 'configs/environment.toml')
     baselines = load_baseline_config(ROOT / 'configs/baselines.toml')

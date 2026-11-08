@@ -11,13 +11,14 @@ param(
     [int]$StopAfter = 0
 )
 $ErrorActionPreference = 'Stop'
+$projectRoot = Split-Path -Parent $PSScriptRoot
 $previousEnvironment = @{}
 foreach ($name in @('TEMP', 'TMP', 'PYTHONDONTWRITEBYTECODE', 'MPLCONFIGDIR', 'NUMBA_CACHE_DIR', 'TORCH_HOME', 'TORCHINDUCTOR_CACHE_DIR', 'XDG_CACHE_HOME', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'PYTHONUTF8')) {
     $previousEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
-Push-Location -LiteralPath $PSScriptRoot
+Push-Location -LiteralPath $projectRoot
 try {
-    $enhancedTmp = Join-Path $PSScriptRoot 'tmp'
+    $enhancedTmp = Join-Path $projectRoot 'tmp'
     New-Item -ItemType Directory -Force -Path $enhancedTmp | Out-Null
     $env:TEMP = $enhancedTmp
     $env:TMP = $enhancedTmp
@@ -25,14 +26,14 @@ try {
     $env:PYTHONUTF8 = '1'
     $env:MPLCONFIGDIR = Join-Path $enhancedTmp 'matplotlib'
     $env:NUMBA_CACHE_DIR = Join-Path $enhancedTmp 'numba'
-    $env:TORCH_HOME = Join-Path $PSScriptRoot '.cache/torch'
+    $env:TORCH_HOME = Join-Path $projectRoot '.cache/torch'
     $env:TORCHINDUCTOR_CACHE_DIR = Join-Path $enhancedTmp 'torchinductor'
     $env:XDG_CACHE_HOME = Join-Path $enhancedTmp 'cache'
     $env:OMP_NUM_THREADS = '1'
     $env:MKL_NUM_THREADS = '1'
     $env:OPENBLAS_NUM_THREADS = '1'
-    $enhancedPython = Join-Path $PSScriptRoot '.venv/Scripts/python.exe'
-    if (-not (Test-Path -LiteralPath $enhancedPython)) { throw 'Run .\run.ps1 -Task setup first.' }
+    $enhancedPython = Join-Path $projectRoot '.venv/Scripts/python.exe'
+    if (-not (Test-Path -LiteralPath $enhancedPython)) { throw 'Run .\scripts\run.ps1 -Task setup first.' }
     $enhancedArgs = @('-m','gridguard.enhanced_experiment',$Task,'--output',$Output,'--seed',"$Seed",'--shield',$Shield,'--split',$Split)
     if ($Resume) { $enhancedArgs += '--resume' }
     if ($Smoke) { $enhancedArgs += '--smoke' }

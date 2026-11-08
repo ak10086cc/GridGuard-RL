@@ -6,7 +6,7 @@
 
 我在项目中完成了电网与光伏建模、传统控制和强化学习环境实现、SAC 训练与断点保存、统一评测及结果整理。项目使用 Python、pandapower、Gymnasium、PyTorch 和 Stable-Baselines3。
 
-![四种方法在四个合成测试日上的电压越限率和平均线路网损](./results/sac_resume_20261029/sac_formal_20261028/test_comparison.png)
+![四种方法在四个合成测试日上的电压越限率和平均线路网损](./reports/figures/test_comparison.png)
 
 ## 独立测试结果
 
@@ -21,7 +21,7 @@
 
 越限率以**成功潮流的节点—时刻数**为分母，包含全部 33 个节点。各方法及 SAC 三个种子均完成全部测试回合，有效样本覆盖率为 100%，最终步骤潮流失败率为 0；所有方法的完整无越限回合比例均为 0。SAC 的平均电压偏差较低，但平均网损和无功动作幅度高于 DSG，不能概括为 SAC 全面优于基线。
 
-完整记录包括 [汇总指标](./results/sac_resume_20261029/sac_formal_20261028/test_aggregate.csv)、[各场景结果](./results/sac_resume_20261029/sac_formal_20261028/test_per_scenario.csv)、[各模型结果](./results/sac_resume_20261029/sac_formal_20261028/test_per_seed.csv)、逐步电压及动作数据、[代表性电压曲线](./results/sac_resume_20261029/sac_formal_20261028/test_voltage_curves.png)。网损功率（MW）与按 15 分钟积分得到的累计损耗电量（MWh）分别记录。
+完整记录包括 [汇总指标](./outputs/runs/sac_resume_20261029/sac_formal_20261028/test_aggregate.csv)、[各场景结果](./outputs/runs/sac_resume_20261029/sac_formal_20261028/test_per_scenario.csv)、[各模型结果](./outputs/runs/sac_resume_20261029/sac_formal_20261028/test_per_seed.csv)、逐步电压及动作数据、[代表性电压曲线](./reports/figures/test_voltage_curves.png)。网损功率（MW）与按 15 分钟积分得到的累计损耗电量（MWh）分别记录。
 
 ## 方法与本人工作
 
@@ -36,12 +36,12 @@
 以下命令在 **Windows PowerShell** 中执行。需要 Python **3.12**、Git 和网络连接；首次安装需要下载 CPU 版 PyTorch 与依赖，耗时取决于网络。本项目已锁定依赖版本，不要求 Docker。
 
 ```powershell
-# 克隆后进入项目根目录；仓库公开前需使用有权限的账号
+# 克隆后进入项目根目录
 git clone https://github.com/ak10086cc/GridGuard-RL.git
 cd GridGuard-RL
 py -3.12 --version
-.\run.ps1 -Task setup
-.\run.ps1 -Task demo -Output tmp/demo_seed42
+.\scripts\run.ps1 -Task setup
+.\scripts\run.ps1 -Task demo -Output tmp/demo_seed42
 ```
 
 演示加载仓库内 **种子 7 的验证最优 SAC 模型**，在单个保留开发日上运行 Unity PF 和 SAC，各 96 步；它不是正式测试集结果，也不重新训练。当前电脑的本地演示约 14 秒，安装时间和其他机器的运行时间会不同。结果位于 `tmp/demo_seed42/`：`summary.json`、`comparison.csv`、逐步指标和逐设备动作。该输出目录必须不存在；再次运行时换一个清晰的目录名，避免覆盖旧结果。
@@ -49,7 +49,7 @@ py -3.12 --version
 本机测试时，从 PyTorch 官方源直接下载 CPU 安装包发生读取超时。若遇到相同问题，可先从[官方地址](https://download-r2.pytorch.org/whl/cpu/torch-2.8.0%2Bcpu-cp312-cp312-win_amd64.whl)获取对应 Windows / Python 3.12 的 wheel，放入项目的 `tmp/wheels/`，再执行：
 
 ```powershell
-.\run.ps1 -Task setup -TorchWheel .\tmp\wheels\torch-2.8.0+cpu-cp312-cp312-win_amd64.whl -IndexUrl https://mirrors.aliyun.com/pypi/simple/
+.\scripts\run.ps1 -Task setup -TorchWheel .\tmp\wheels\torch-2.8.0+cpu-cp312-cp312-win_amd64.whl -IndexUrl https://mirrors.aliyun.com/pypi/simple/
 ```
 
 wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干净环境验证时使用了本机已有的官方 PyTorch wheel 和上述镜像；脚本校验 CPU 版 PyTorch 版本，并允许失败后重新运行安装命令。
@@ -59,8 +59,8 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 若仅需检查依赖或运行自动化测试：
 
 ```powershell
-.\run.ps1 -Task info
-.\run.ps1 -Task test
+.\scripts\run.ps1 -Task info
+.\scripts\run.ps1 -Task test
 ```
 
 ## 训练、模型与复现
@@ -68,16 +68,16 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 正式训练配置位于 [configs/sac_formal.toml](./configs/sac_formal.toml)：CPU 最多两个并行进程、每进程单线程，3 个训练种子、每种子 50,000 步，每 5,000 步使用验证集选择模型并保存末尾恢复包。以下命令会按配置并行启动最多两个训练进程，须先获得对应运行授权并检查 RAM、CPU 与磁盘预算，预留数小时；不要指向现有实验目录。当前入口未提供 RAM/磁盘硬性停止保护，不能省略运行前检查。
 
 ```powershell
-.\run.ps1 -Task sac-formal -Output results/sac_formal_new
+.\scripts\run.ps1 -Task sac-formal -Output outputs/runs/sac_formal_new
 ```
 
 如需单独重新评测已分发的种子7模型和三个基线，可运行下列命令；它会计算全部四个测试日，耗时明显长于快速演示。其他种子替换模型路径和输出目录即可。三种子聚合的原始结果见前述指标文件。
 
 ```powershell
-.\run.ps1 -Task sac-evaluate -SACConfig configs/sac_formal.toml -Model results/sac_resume_20261029/sac_seed7_20261028/best_model.zip -Split test -Output tmp/sac_seed7_test_recheck
+.\scripts\run.ps1 -Task sac-evaluate -SACConfig configs/sac_formal.toml -Model outputs/runs/sac_resume_20261029/sac_seed7_20261028/best_model.zip -Split test -Output tmp/sac_seed7_test_recheck
 ```
 
-结果目录保存了[实验配置与源码快照](./results/sac_resume_20261029/sac_formal_20261028/frozen_plan.json)、各种子的训练/验证曲线数据、三份验证最优 `best_model.zip`、测试原始指标和图表。原实验训练时的源码保存在同目录的 `source_snapshot.zip`；后续增强和演示开发使当前源码版本与训练时快照不同。末尾恢复包和较早的中间实验不随仓库分发。新的实验结果默认被 `.gitignore` 忽略，需要发布时再审查并明确纳入。
+结果目录保存了[实验配置与源码快照](./outputs/runs/sac_resume_20261029/sac_formal_20261028/frozen_plan.json)、各种子的训练/验证曲线数据、三份验证最优 `best_model.zip`、测试原始指标和图表。原实验训练时的源码保存在同目录的 `source_snapshot.zip`；后续增强和演示开发使当前源码版本与训练时快照不同。末尾恢复包和较早的中间实验不随仓库分发。新的实验结果默认被 `.gitignore` 忽略，需要发布时再审查并明确纳入。
 
 模型文件包含 Stable-Baselines3 序列化内容，加载时只使用可信来源。分发的模型由本项目使用合成场景训练，没有加载外部预训练权重。原研究论文 PDF 仅本地查阅，不随仓库分发。
 
@@ -86,19 +86,20 @@ wheel 不随仓库分发；其余依赖通过指定的 Python 包源安装。干
 - 本项目只测试了一个网络及有限合成日，没有实测数据、硬件验证或跨网络泛化结论。电压范围 0.95—1.05 p.u. 是实验配置，并非接入标准合规声明。
 - 夜间关闭无功服务时存在无法由这些设备修正的欠压。潮流收敛、完成回合与电压全部合格是不同指标。
 - DSG 的部分参数和实现细节采用明确的项目约定；论文原有结果没有计入本项目结果。
-- [残差与有限次数潮流校验](./gridguard/enhanced.py)已通过小规模功能测试，但尚未进行正式训练或独立消融。对预先越限的工况，筛选可能接受不加重越限的动作，不能将其称为严格安全。
+- [残差与有限次数潮流校验](./src/gridguard/enhanced.py)已通过小规模功能测试，但尚未进行正式训练或独立消融。对预先越限的工况，筛选可能接受不加重越限的动作，不能将其称为严格安全。
 
 ## 项目结构
 
 ```text
-configs/       网络、基线、环境及训练配置
-gridguard/     潮流、控制器、环境、训练、评测与演示入口
-tests/         物理约束、环境、基线、训练及恢复检查
-results/       首版正式结果、模型、图表、配置和原始指标
-run.ps1        Windows 安装、演示、训练与测试入口
-run_enhanced.ps1  可选增强模块入口；未开展正式增强实验
-tmp/           可删除的测试、绘图/编译缓存、临时检查与试跑输出，不提交
-.cache/        按需生成的可复用下载缓存，不提交，清理前核对影响
+configs/          网络、基线、环境及训练配置
+docs/             本地方案与参考论文，不公开分发
+outputs/runs/     训练运行及可追溯结果；新运行默认不提交
+reports/figures/  README 展示图表
+scripts/          Windows 安装、演示、训练与测试入口
+src/gridguard/    潮流、控制器、环境、训练、评测与演示实现
+tests/             物理约束、环境、基线、训练及恢复检查
+tmp/               可删除的测试、绘图/编译缓存、临时检查与试跑输出
+.cache/            按需生成的可复用下载缓存，不提交
 ```
 
 ## 许可与来源

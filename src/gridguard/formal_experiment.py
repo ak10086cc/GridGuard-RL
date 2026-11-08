@@ -22,7 +22,7 @@ from .learning import (MeasuredSAC, ScenarioPoolEnv, ValidationCallback, actor_d
                        plot_training, scenario_manifest)
 from .policy_evaluation import evaluate_policies
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def atomic_replace(source, destination):

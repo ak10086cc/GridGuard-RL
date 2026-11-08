@@ -14,29 +14,30 @@ param(
     [switch]$Resume
 )
 $ErrorActionPreference = 'Stop'
+$projectRoot = Split-Path -Parent $PSScriptRoot
 $previousEnvironment = @{}
 foreach ($name in @('TEMP', 'TMP', 'PIP_CACHE_DIR', 'PYTHONDONTWRITEBYTECODE', 'MPLCONFIGDIR', 'NUMBA_CACHE_DIR', 'TORCH_HOME', 'TORCHINDUCTOR_CACHE_DIR', 'XDG_CACHE_HOME', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'PYTHONUTF8')) {
     $previousEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
-Push-Location -LiteralPath $PSScriptRoot
+Push-Location -LiteralPath $projectRoot
 try {
     # All settings are limited to this process and its children.
-    $taskTmp = Join-Path $PSScriptRoot 'tmp'
+    $taskTmp = Join-Path $projectRoot 'tmp'
     New-Item -ItemType Directory -Force -Path $taskTmp | Out-Null
     $env:TEMP = $taskTmp
     $env:TMP = $taskTmp
-    $env:PIP_CACHE_DIR = Join-Path $PSScriptRoot '.cache/pip'
+    $env:PIP_CACHE_DIR = Join-Path $projectRoot '.cache/pip'
     $env:PYTHONDONTWRITEBYTECODE = '1'
     $env:MPLCONFIGDIR = Join-Path $taskTmp 'matplotlib'
     $env:NUMBA_CACHE_DIR = Join-Path $taskTmp 'numba'
-    $env:TORCH_HOME = Join-Path $PSScriptRoot '.cache/torch'
+    $env:TORCH_HOME = Join-Path $projectRoot '.cache/torch'
     $env:TORCHINDUCTOR_CACHE_DIR = Join-Path $taskTmp 'torchinductor'
     $env:XDG_CACHE_HOME = Join-Path $taskTmp 'cache'
     $env:OMP_NUM_THREADS = '1'
     $env:MKL_NUM_THREADS = '1'
     $env:OPENBLAS_NUM_THREADS = '1'
     $env:PYTHONUTF8 = '1'
-    $taskPython = Join-Path $PSScriptRoot '.venv/Scripts/python.exe'
+    $taskPython = Join-Path $projectRoot '.venv/Scripts/python.exe'
     if ($Task -eq 'setup') {
         if (-not (Test-Path -LiteralPath $taskPython)) {
             & py -3.12 -m venv .venv
@@ -59,7 +60,7 @@ try {
         if ($IndexUrl) { $installArgs += @('--index-url', $IndexUrl) }
         & $taskPython @installArgs
     } elseif (-not (Test-Path -LiteralPath $taskPython)) {
-        throw 'Run .\run.ps1 -Task setup first (requires Python 3.12).'
+        throw 'Run .\scripts\run.ps1 -Task setup first (requires Python 3.12).'
     } elseif ($Task -eq 'test') {
         & $taskPython -m pytest
     } else {
